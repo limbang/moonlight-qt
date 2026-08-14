@@ -13,13 +13,13 @@
 
 **支持平台：**
 - Windows (x64/ARM64) - 使用 Qt 6.11.1
-- macOS - 使用 Qt 6.11.1
+- macOS (arm64 / x86_64) - 使用 Qt 6.11.1
 - Linux (x86_64 / aarch64) - 使用 Qt 6.11.1
 - SteamLink - 交叉编译
 
 **构建产物：**
 - Windows: `Moonlight-VPlus-Portable-{arch}-r{build_number}.zip`
-- macOS: `Moonlight-VPlus-r{build_number}.dmg`
+- macOS: `Moonlight-VPlus-r{build_number}-{arch}.dmg`
 - Linux: `Moonlight-VPlus-r{build_number}-{arch}.AppImage`
 - SteamLink: `Moonlight-VPlus-SteamLink-r{build_number}.zip`
 
@@ -35,8 +35,9 @@
 - 生成调试符号包
 
 ### macOS 构建
-- 使用 macOS 14 (Sonoma)
-- 生成 DMG 安装包
+- arm64 走 GitHub 的 Apple Silicon runner（`macos-15`），x86_64 走最后一个 Intel
+  托管 runner（`macos-15-intel`，支持到 2027 年 8 月）
+- 每个架构单独生成带架构后缀的 DMG 安装包
 - 需要 Node.js 和 create-dmg
 
 ### Linux 构建

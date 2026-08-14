@@ -207,8 +207,20 @@ jobs:
           build/installer-Release/MoonlightSetup-*.exe
 
   build-macos:
-    runs-on: macos-15
-    
+    name: build-macos (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-15
+          # x86_64 用 macos-15-intel：这是 GitHub 托管的最后一个 Intel runner，
+          # 支持到 2027 年 8 月。之后还要出 Intel 包就只能走交叉编译或自托管。
+          - arch: x86_64
+            runner: macos-15-intel
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -236,13 +248,19 @@ jobs:
         aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@073e34d7c2ab4ae6961ed7cca690b3abd5ba5a7e'
 
     - name: Build and generate DMG
+      env:
+        MOONLIGHT_ARCH: ${{ matrix.arch }}
       run: |
         scripts/generate-dmg.sh Release
+
+    - name: Verify DMG architecture
+      run: |
+        lipo -archs build/build-Release/app/Moonlight.app/Contents/MacOS/Moonlight | grep -qx "${{ matrix.arch }}"
 
     - name: Upload DMG artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Moonlight-VPlus-r${{ env.BUILD_NUMBER }}.dmg
+        name: Moonlight-VPlus-r${{ env.BUILD_NUMBER }}-${{ matrix.arch }}.dmg
         path: build/installer-Release/Moonlight-VPlus-*.dmg
         if-no-files-found: error
 

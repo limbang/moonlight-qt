@@ -316,6 +316,9 @@ HEADERS += \
 macx {
     HEADERS += gui/macwindowchrome.h
     SOURCES += gui/macwindowchrome.mm
+
+    HEADERS += gui/macmetalcompat.h
+    SOURCES += gui/macmetalcompat.mm
 }
 
 # Platform-specific renderers and decoders

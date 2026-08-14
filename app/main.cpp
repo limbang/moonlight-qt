@@ -42,6 +42,8 @@
 #include <dxgi1_6.h>
 #elif defined(Q_OS_LINUX)
 #include <openssl/ssl.h>
+#elif defined(Q_OS_DARWIN)
+#include "gui/macmetalcompat.h"
 #endif
 
 static QString getStartupApplicationDir(const char* argv0)
@@ -688,6 +690,19 @@ int main(int argc, char *argv[])
     // streaming code may block the main thread while pumping events.
     if (!qEnvironmentVariableIsSet("QSG_RENDER_LOOP")) {
         qputenv("QSG_RENDER_LOOP", "basic");
+    }
+#endif
+
+#if defined(Q_OS_DARWIN)
+    // Qt 6 的 Metal 渲染管线在部分老 Intel iGPU（Haswell/Broadwell/Skylake
+    // 一代的 HD/Iris/Iris Pro）上创建失败，QML 界面整窗空白，日志里反复出现
+    // "Failed to create render pipeline state: Attribute N refers to a buffer
+    // index X that is not valid"。这类机器退回 OpenGL 后端即可正常显示；
+    // Apple Silicon 和 2017+ 的 Mac 不受影响，继续用默认的 Metal。用户仍可
+    // 以通过 QSG_RHI_BACKEND 环境变量显式覆盖这里的决定。
+    if (!qEnvironmentVariableIsSet("QSG_RHI_BACKEND") &&
+        shouldForceOpenGLSceneGraphBackend()) {
+        qputenv("QSG_RHI_BACKEND", "opengl");
     }
 #endif
 

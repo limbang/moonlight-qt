@@ -13,7 +13,7 @@ It remains compatible with upstream Moonlight and standard Sunshine hosts, while
 
 Download Windows, macOS, Linux AppImage, and Steam Link builds from [GitHub Releases](https://github.com/qiin2333/moonlight-qt/releases).
 
-> **macOS currently ships Apple Silicon (arm64) builds only**, named like `Moonlight-VPlus-<version>-arm64.dmg`.
+> **macOS ships both Apple Silicon (arm64) and Intel (x86_64) builds**, named like `Moonlight-VPlus-<version>-arm64.dmg` / `Moonlight-VPlus-<version>-x86_64.dmg`; pick the one matching your Mac.
 >
 > **Linux AppImages are available for x86_64 and aarch64**, named like `Moonlight-VPlus-<version>-x86_64.AppImage` and `Moonlight-VPlus-<version>-aarch64.AppImage`.
 

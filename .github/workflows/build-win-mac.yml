@@ -29,8 +29,15 @@ jobs:
           # Windows
           - os: windows-2025
             qt_version: 6.11.1
+            # 一个 job 同时出 x64 + arm64，符号包里两种都有，用 all 避免和 macOS 撞名。
+            arch: all
           # macOS
           - os: macos-26
+            arch: arm64
+            qt_version: 6.11.1
+          # x86_64 用 macos-15-intel：GitHub 托管的最后一个 Intel runner（支持到 2027 年 8 月）。
+          - os: macos-15-intel
+            arch: x86_64
             qt_version: 6.11.1
 
     runs-on: ${{ matrix.os }}
@@ -97,6 +104,7 @@ jobs:
           if ($Env:RUNNER_OS -eq "Windows") {
             cmd /c scripts\generate-bundle.bat Release
           } else {
+            $env:MOONLIGHT_ARCH = "${{ matrix.arch }}"
             bash scripts/generate-dmg.sh Release
           }
 
@@ -120,7 +128,7 @@ jobs:
         uses: actions/upload-artifact@v6
         if: runner.os == 'macOS'
         with:
-          name: Moonlight-VPlus-${{ runner.os }}-${{ env.CI_VERSION }}
+          name: Moonlight-VPlus-${{ runner.os }}-${{ matrix.arch }}-${{ env.CI_VERSION }}
           path: build/installer-Release/*.dmg
           compression-level: 0
           if-no-files-found: error
@@ -128,7 +136,7 @@ jobs:
       - name: Upload Symbols
         uses: actions/upload-artifact@v6
         with:
-          name: zDevDbgSyms-${{ runner.os }}-${{ env.CI_VERSION }}
+          name: zDevDbgSyms-${{ runner.os }}-${{ matrix.arch }}-${{ env.CI_VERSION }}
           path: |
             build/installer-*/*.dsym/*
             build/symbols-*/*.pdb

@@ -21,6 +21,7 @@ extern "C" {
 
 #ifdef Q_OS_DARWIN
 #include "ffmpeg-renderers/vt.h"
+#include "gui/macmetalcompat.h"
 #endif
 
 #ifdef HAVE_LIBVA
@@ -1054,9 +1055,12 @@ IFFmpegRenderer* FFmpegVideoDecoder::createHwAccelRenderer(const AVCodecHWConfig
 #endif
 #ifdef Q_OS_DARWIN
         case AV_HWDEVICE_TYPE_VIDEOTOOLBOX:
-            // Prefer the libplacebo (on MoltenVK) renderer unless explicitly opted out
+            // Prefer the libplacebo (on MoltenVK) renderer unless explicitly
+            // opted out or the machine has an old Intel iGPU where MoltenVK's
+            // Vulkan renderer is unstable (VK_ERROR_DEVICE_LOST black screen).
 #ifdef HAVE_LIBPLACEBO_VULKAN
-            if (params->renderer == StreamingPreferences::RS_AUTO || params->renderer == StreamingPreferences::RS_VULKAN) {
+            if (params->renderer == StreamingPreferences::RS_VULKAN ||
+                (params->renderer == StreamingPreferences::RS_AUTO && !hasOldIntelIntegratedGpu())) {
                 return new PlVkRenderer(hwDecodeCfg->device_type);
             }
 #endif
@@ -1360,6 +1364,11 @@ bool FFmpegVideoDecoder::tryInitializeRendererForUnknownDecoder(const AVCodec* d
         vulkanIsSlow = true;
 #else
         vulkanIsSlow = WMUtils::isGpuSlow();
+#ifdef Q_OS_DARWIN
+        // 老 Intel 核显机器上 MoltenVK 的 Vulkan 视频渲染会 VK_ERROR_DEVICE_LOST
+        // （连接后黑屏），让 SDL 的 Metal 后端优先，Vulkan 只作最后兜底。
+        vulkanIsSlow = vulkanIsSlow || hasOldIntelIntegratedGpu();
+#endif
 #endif
     }
 
@@ -2291,4 +2300,3 @@ void FFmpegVideoDecoder::renderFrameOnMainThread()
 {
     m_Pacer->renderOnMainThread();
 }
-

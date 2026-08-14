@@ -13,7 +13,7 @@ Moonlight V+ for PC 是基于 [moonlight-stream/moonlight-qt](https://github.com
 
 推荐从 [GitHub Releases](https://github.com/qiin2333/moonlight-qt/releases) 下载 Windows、macOS、Linux AppImage 和 Steam Link 构建产物。
 
-> **macOS 目前只提供 Apple Silicon（arm64）构建**，资产名形如 `Moonlight-VPlus-<版本>-arm64.dmg`。Intel Mac 需要自行按下面「从源码构建」的步骤编译。
+> **macOS 提供 Apple Silicon（arm64）和 Intel（x86_64）两份构建**，资产名形如 `Moonlight-VPlus-<版本>-arm64.dmg` / `Moonlight-VPlus-<版本>-x86_64.dmg`，按本机架构下载即可。
 >
 > **Linux AppImage 提供 x86_64 和 aarch64 两份**，资产名形如 `Moonlight-VPlus-<版本>-x86_64.AppImage` / `Moonlight-VPlus-<版本>-aarch64.AppImage`。x86_64 在 Ubuntu 22.04 上构建（glibc >= 2.35），aarch64 在 Ubuntu 24.04 上构建（glibc >= 2.39，因此 Debian 12 / Raspberry Pi OS bookworm 用不了，需要 trixie 或更新）。
 
@@ -115,6 +115,13 @@ scripts\generate-bundle.bat
 qmake6 moonlight-qt.pro
 make release
 scripts/generate-dmg.sh
+```
+
+`generate-dmg.sh` 默认按本机架构出包；要在 Apple Silicon 上交叉出 Intel 包，可以指定
+`MOONLIGHT_ARCH`：
+
+```bash
+MOONLIGHT_ARCH=x86_64 scripts/generate-dmg.sh
 ```
 
 ### Linux
